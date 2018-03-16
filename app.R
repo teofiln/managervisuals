@@ -1,3 +1,4 @@
+# install.packages("package name") - if you don't have them
 library(shiny)
 library(shinydashboard)
 library(ggplot2)
@@ -19,7 +20,7 @@ sidebar <- dashboardSidebar(
 
 body <- dashboardBody(
   fluidRow(
-    box(plotlyOutput("plot",height = "800px")),
+    box(plotlyOutput("plot", height = "1000px")),
     box(dataTableOutput("DT"))
   )
 )
@@ -80,7 +81,7 @@ server <- function(input, output) {
   
   makePlot <- reactive({
     
-    pp <- ggplot(df.raw, aes(x=Account, y=Amount/1000, fill=Group)) +
+    pp <- ggplot(cash_summary(csvfile), aes(x=Account, y=Amount/1000, fill=Group)) +
       geom_bar(stat="identity", position = "dodge", width=.6) +
       #scale_y_continuous(trans="log", breaks=10^{1:5}) +
       scale_fill_discrete(name="")+
