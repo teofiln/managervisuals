@@ -8,17 +8,20 @@ header <- dashboardHeader(title="Manager.io::visualisations", titleWidth = 250)
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
-    radioButtons("sep", "Choose separator", choices=c("tab", "comma"), selected="tab", inline=TRUE),
-    fileInput('file', 'Choose a CSV file to upload', accept = '.csv' ),
+    menuItem("File input", tabName="inputs", icon = icon("dashboard"),
+           radioButtons("sep", "Choose separator", choices=c("tab", "comma"), selected="tab", inline=TRUE),
+           fileInput('file', 'Choose a CSV file to upload', accept = '.csv' )),
     menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
     menuItem("Widgets", icon = icon("th"), tabName = "widgets",
-             badgeLabel = "new", badgeColor = "green")
+           badgeLabel = "new", badgeColor = "green")
   )
 )
 
 body <- dashboardBody(
-    # render data table
-  dataTableOutput("DT")
+  fluidRow(
+    box(plotlyOutput("plot",height = "800px")),
+    box(dataTableOutput("DT"))
+  )
 )
 
 ui <- dashboardPage(header, sidebar, body)
@@ -75,8 +78,25 @@ server <- function(input, output) {
     cash_summary(csvfile)
   })
   
+  makePlot <- reactive({
+    
+    pp <- ggplot(df.raw, aes(x=Account, y=Amount/1000, fill=Group)) +
+      geom_bar(stat="identity", position = "dodge", width=.6) +
+      #scale_y_continuous(trans="log", breaks=10^{1:5}) +
+      scale_fill_discrete(name="")+
+      xlab("") + ylab("") +
+      coord_flip()
+    
+    pp <- plotly_build(pp)
+    return(pp)
+  })
   
-  # make reactive table based on input csv
+  # render the plot
+  output$plot <- renderPlotly({
+    makePlot()
+  })
+   
+  # render the table
   output$DT <- renderDataTable({
     loadData()
   })
