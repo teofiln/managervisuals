@@ -10,7 +10,7 @@ header <- dashboardHeader(title="Manager.io::visualisations", titleWidth = 250)
 sidebar <- dashboardSidebar(
   sidebarMenu(
     menuItem("File input", tabName="inputs", icon = icon("dashboard"),
-           radioButtons("sep", "Choose separator", choices=c("tab", "comma"), selected="tab", inline=TRUE),
+           radioButtons("sep", "Choose separator", choices=c("tab", "comma"), selected="comma", inline=TRUE),
            fileInput('file', 'Choose a CSV file to upload', accept = '.csv' )),
     menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
     menuItem("Widgets", icon = icon("th"), tabName = "widgets",
@@ -20,8 +20,8 @@ sidebar <- dashboardSidebar(
 
 body <- dashboardBody(
   fluidRow(
-    box(plotlyOutput("plot", height = "1000px")),
-    box(dataTableOutput("DT"))
+    box(plotlyOutput("plot", height = "1000px"))
+    #box(dataTableOutput("DT"))
   )
 )
 
@@ -50,8 +50,8 @@ server <- function(input, output) {
   })
   
   makePlot <- reactive({
-    
-    pp <- ggplot(cash_summary(csvfile), aes(x=Account, y=Amount/1000, fill=Group)) +
+    csvfile <- loadData()
+    pp <- ggplot(csvfile, aes(x=Account, y=Amount/1000, fill=Group)) +
       geom_bar(stat="identity", position = "dodge", width=.6) +
       #scale_y_continuous(trans="log", breaks=10^{1:5}) +
       scale_fill_discrete(name="")+
@@ -68,9 +68,9 @@ server <- function(input, output) {
   })
    
   # render the table
-  output$DT <- renderDataTable({
-    loadData()
-  })
+  #output$DT <- renderDataTable({
+  #  loadData()
+  #})
   
 }
 
