@@ -10,7 +10,7 @@ header <- dashboardHeader(title="Manager.io::visualisations", titleWidth = 250)
 sidebar <- dashboardSidebar(
   sidebarMenu(
     menuItem("File input", tabName="inputs", icon = icon("dashboard"),
-           radioButtons("sep", "Choose separator", choices=c("tab", "comma"), selected="tab", inline=TRUE),
+           radioButtons("sep", "Choose separator", choices=c("tab", "comma"), selected="comma", inline=TRUE),
            fileInput('file', 'Choose a CSV file to upload', accept = '.csv' )),
     menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
     menuItem("Widgets", icon = icon("th"), tabName = "widgets",
