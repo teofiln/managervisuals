@@ -48,6 +48,6 @@ for (i in seq_along(filenames)) {
 
   #append to data frame
   cashflow <- bind_rows(cashflow, RAW_RAW)
-  write.csv(cashflow, file = "cashflow.csv")
-  
 }
+
+write.csv(cashflow, file = "cashflow.csv")

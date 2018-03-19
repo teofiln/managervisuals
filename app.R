@@ -20,7 +20,8 @@ sidebar <- dashboardSidebar(
 
 body <- dashboardBody(
   fluidRow(
-    box(plotlyOutput("plot", height = "1000px")),
+    uiOutput("checks"),
+    box(plotlyOutput("plot")),
     box(dataTableOutput("DT"))
   )
 )
@@ -43,22 +44,39 @@ server <- function(input, output) {
     
   })
   
-  
   loadData <- reactive({
-    csvfile <- read.delim(getFile()$datapath, sep=getSeparator(), stringsAsFactors = FALSE) 
+    csvfile <- read_delim(getFile()$datapath, delim=getSeparator()) 
     return(csvfile)
   })
+
+  # reactive UI
+    output$checks <- renderUI({
+      DD <- loadData()
+      box(width=3,
+        checkboxGroupInput(inputId = 'choices', 
+                           label = 'Select account(s)', 
+                           choices = unique(DD$Account), 
+                           selected = unique(DD$Account)[1:3])    
+      )
+  })
   
+  dataSub <- reactive({
+    D <- loadData() %>% filter(Account %in% input$choices)
+    return(D)
+  })
+    
   makePlot <- reactive({
-    
-    pp <- ggplot(cash_summary(csvfile), aes(x=Account, y=Amount/1000, fill=Group)) +
-      geom_bar(stat="identity", position = "dodge", width=.6) +
-      #scale_y_continuous(trans="log", breaks=10^{1:5}) +
-      scale_fill_discrete(name="")+
+    pp <- ggplot(dataSub(), aes(x=Date, y=Amount, fill=Group)) +
+      geom_bar(stat="identity", position = "stack", width=.6) +
+      #geom_point(size=3, pch=21, alpha=.6) +
+      scale_y_continuous(trans="log", breaks=10^{1:10}) +
+      scale_fill_brewer(name="", palette = "Set1") +
       xlab("") + ylab("") +
-      coord_flip()
+      facet_wrap("Account", labeller = label_wrap_gen()) +
+      #coord_flip() + 
+      theme(legend.position = "top")
     
-    pp <- plotly_build(pp)
+    pp <- ggplotly(pp)
     return(pp)
   })
   
@@ -69,7 +87,7 @@ server <- function(input, output) {
    
   # render the table
   output$DT <- renderDataTable({
-    loadData()
+    dataSub()
   })
   
 }
